@@ -1,0 +1,55 @@
+# Tests for sexp-wise navigation
+%prep
+  # TODO: load the navigation file
+  #. ../zle-sexp-navigation.zsh
+  export TERM=xterm-256color
+  if [[ ${+termcap} != 1 || ${termcap[Co]} != <-> || ${termcap[Co]} -lt 256 ]]; then
+      ZTST_unimplemented="no termcap module OR termcap doesn't support 256 or more colors"
+  elif [[ $OSTYPE == cygwin ]]; then
+      ZTST_unimplemented='the zsh/zpty module does not work on Cygwin'
+  elif zmodload zsh/zpty 2> /dev/null; then
+      . $ZTST_srcdir/comptest.zsh
+      comptestinit
+      navtest() {
+          local test_function=$1
+          local cursor=$2
+          local input_buffer=$3
+          zpty_run ". ../zle-sexp-navigation.zsh ; _test_setup() { zle beginning-of-line; repeat $cursor; do zle forward-char; done }; zle -N _test_setup; bindkey '^A' _test_setup"
+          zpty_run "bindkey '^B' $test_function"
+          # Write the test buffer and move to it:
+          zpty -n -w zsh "$input_buffer"
+          zpty -n -w zsh $'\C-A'
+          # Run the widget:
+          zpty -n -w zsh $'\C-B'
+          # Write the state after running the widget:
+          zpty -n -w zsh $'\C-X'
+          zpty -r -m zsh log "*<WIDGET><finish>*<PROMPT>*" || {
+              print "failed to invoke finish widget."
+              return 1
+          }
+          print -lr "${(@)${(@ps:\r\n:)log##*<WIDGET><finish>}[2,-2]}"
+      }
+  else
+      ZTST_unimplemented='the zsh/zpty module is not available'
+  fi
+
+%test
+  navtest forward-sexp 3 'foo "bar baz" bonk'
+0:forward-sexp over a quoted expr
+>BUFFER: foo "bar baz" bonk
+>CURSOR: 13
+
+  navtest forward-sexp 3 'foo --x="bar baz" bonk'
+0:forward-sexp over a complex quoted expr
+>BUFFER: foo --x="bar baz" bonk
+>CURSOR: 17
+
+  navtest backward-sexp 13 'foo "bar baz" bonk'
+0:backward-sexp over a quoted expr
+>BUFFER: foo "bar baz" bonk
+>CURSOR: 3
+
+  navtest backward-sexp 17 'foo --x="bar baz" bonk'
+0:backward-sexp over a complex quoted expr
+>BUFFER: foo --x="bar baz" bonk
+>CURSOR: 3
