@@ -39,17 +39,17 @@
 >BUFFER: foo "bar baz" bonk
 >CURSOR: 13
 
-  navtest forward-sexp 3 'foo --x="bar baz" bonk'
+  navtest forward-sexp 3 "foo --x=\"bar 'oink' baz\" bonk"
 0:forward-sexp over a complex quoted expr
->BUFFER: foo --x="bar baz" bonk
->CURSOR: 17
+>BUFFER: foo --x="bar 'oink' baz" bonk
+>CURSOR: 24
 
   navtest backward-sexp 13 'foo "bar baz" bonk'
 0:backward-sexp over a quoted expr
 >BUFFER: foo "bar baz" bonk
 >CURSOR: 3
 
-  navtest backward-sexp 17 'foo --x="bar baz" bonk'
+  navtest backward-sexp 24 "foo --x=\"bar 'oink' baz\" bonk"
 0:backward-sexp over a complex quoted expr
->BUFFER: foo --x="bar baz" bonk
+>BUFFER: foo --x="bar 'oink' baz" bonk
 >CURSOR: 3
