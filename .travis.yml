@@ -1,0 +1,8 @@
+language: generic
+sudo: required
+
+env:
+  - ZSH=master
+  - ZSH=5.6.2
+
+script: docker run -v $PWD:/work -w /work zshusers/zsh-${ZSH} /bin/sh -c 'install_packages make procps && make test'
