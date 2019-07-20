@@ -1,0 +1,67 @@
+---
+version: "2.1"
+
+executors:
+  master:
+    docker:
+      - image: zshusers/zsh:master
+
+  stable:
+    docker:
+      - image: zshusers/zsh:5.6.2
+
+commands:
+  install_deps:
+    description: "Install dependencies"
+    steps:
+      - run:
+          command: "install_packages make procps"
+
+  run_tests:
+    description: "Run test suite"
+    steps:
+      - run:
+          command: "make test"
+
+jobs:
+  test:
+    parameters:
+      version:
+        type: executor
+    executor: << parameters.version >>
+    steps:
+      - checkout
+      - install_deps
+      - run_tests
+
+workflows:
+  continuous_integration:
+    jobs:
+      - test:
+          name: test-stable
+          version: stable
+          filters: &ci_filters
+            branches:
+              ignore: ["/.*\\.tmp/"]
+            tags:   {"only": ["/^v\\d+\\.\\d+\\.\\d+.*$/"]}
+      - test:
+          name: test-master
+          version: master
+          filters:
+            branches:
+              ignore: ["/.*\\.tmp/"]
+            tags:   {"only": ["/^v\\d+\\.\\d+\\.\\d+.*$/"]}
+  scheduled_tests:
+    jobs:
+      - test:
+          name: test-stable
+          version: stable
+      - test:
+          name: test-master
+          version: master
+    triggers:
+      - schedule:
+          cron: 0 0 * * 0
+          filters:
+            branches:
+              only: ["master"]
