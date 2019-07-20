@@ -34,6 +34,14 @@ jobs:
       - install_deps
       - run_tests
 
+  ci_success:
+    docker:
+      - image: alpine:latest
+    steps:
+      - run:
+          name: Success
+          command: "echo yay"
+
 workflows:
   continuous_integration:
     jobs:
@@ -51,6 +59,11 @@ workflows:
             branches:
               ignore: ["/.*\\.tmp/"]
             tags:   {"only": ["/^v\\d+\\.\\d+\\.\\d+.*$/"]}
+      - ci_success:
+          requires:
+          - test-stable
+          - test-master
+
   scheduled_tests:
     jobs:
       - test:
