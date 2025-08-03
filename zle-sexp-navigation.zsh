@@ -23,8 +23,20 @@ forward-sexp() {
 }
 
 backward-sexp() {
+    setopt local_options RE_MATCH_PCRE
+
+    local match
+    # Skip whitespace backward to the end of the first plausible shell word beginning:
+    if [[ "$LBUFFER" =~ "(\s+)$" ]] ; then
+        zle backward-char -n ${#match[1]}
+    fi
+
     zle select-a-shell-word
     CURSOR=$MARK
+    # Skip whitespace forward so we're at the beginning of the word:
+    if [[ "${BUFFER:($CURSOR)}" =~ "^(\s+)" ]] ; then
+        (( CURSOR = $CURSOR + ${#match[1]} ))
+    fi
     zle deactivate-region
 }
 
