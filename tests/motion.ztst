@@ -47,12 +47,12 @@
   navtest backward-sexp 13 'foo "bar baz" bonk'
 0:backward-sexp over a quoted expr
 >BUFFER: foo "bar baz" bonk
->CURSOR: 3
+>CURSOR: 4
 
   navtest backward-sexp 24 "foo --x=\"bar 'oink' baz\" bonk"
 0:backward-sexp over a complex quoted expr
 >BUFFER: foo --x="bar 'oink' baz" bonk
->CURSOR: 3
+>CURSOR: 4
 
   navtest kill-sexp 3 "foo --x=\"bar 'oink' baz\" bonk"
 0:kill-sexp on a complex quoted expression
@@ -61,5 +61,5 @@
 
   navtest backward-kill-sexp 24 "foo --x=\"bar 'oink' baz\" bonk"
 0:kill-sexp on a complex quoted expression
->BUFFER: foo bonk
->CURSOR: 3
+>BUFFER: foo  bonk
+>CURSOR: 4
